@@ -1,4 +1,4 @@
-from numpy import place
+
 import streamlit as st
 import plotly.express as px
 import pandas as pd
@@ -19,15 +19,20 @@ PersonalInfo = pd.read_csv('./MainData.csv')
 def convert_df(df):
     return df.to_csv().encode('utf-8')
 
-def plot(data, type, featureA, featureB):
+def plot_stack(data, type, featureA, featureB):
     try:
-        if type == 'Stacked bar':
-            title = f'Relating {featureA} and {featureB}'
-            fig = px.bar(pd.crosstab(data[featureA], data[featureB]), color=featureB, title = title, width = 1000, orientation = 'h')
+        title = f'Relating {featureA} and {featureB}'
+        fig = px.bar(pd.crosstab(data[featureA], data[featureB]), color=featureB, title = title, width = 1000, orientation = 'h')
+    
+    except:
+        fig = Image.open('./error.png')
+    
+    return fig
 
-        elif type == 'Bar graph':
-            title = f'Distribution of {featureA}'
-            fig = px.histogram(data[featureA], title = title, width = 1000)
+def plot_bar(data, type, feature):
+    try:
+        title = f'Distribution of {feature}'
+        fig = px.histogram(data[feature], title = title, width = 1000)
     
     except:
         fig = Image.open('./error.png')
@@ -59,13 +64,22 @@ with head:
         dailyWage = st.checkbox('Daily Wage')    
 
         applied = st.form_submit_button("Apply")
+    
+    with st.sidebar.form("choice"):
+
+        plotType = st.selectbox('Choose type of plot', ('Stacked bar', 'Bar graph'))
+
+        features = st.multiselect('Choose features to plot', PersonalInfo.columns, ['Age', 'gender'])
+
+        submitted = st.form_submit_button("Submit")
             
 
             
+temp = PersonalInfo
 
 with body:
     if applied:
-        temp = PersonalInfo
+        
         if len(occupation) != 0:
             temp = temp.loc[temp.occupation.isin(occupation)] 
         if len(education) != 0:
@@ -90,23 +104,17 @@ with body:
         with st.expander('View Dataframe'):
             st.write(temp)
 
-        with st.form("choice"):
+with placeholder:        
 
-            plotType = st.selectbox('Choose type of plot', ('Stacked bar', 'Bar graph'))
+    if submitted:     
 
-            features = st.multiselect('Choose features to plot', PersonalInfo.columns, ['Age', 'gender'])
+        if plotType == 'Stacked bar':
+            
+            st.write(plot_stack(temp, plotType, features[0], features[1]))
 
-            submitted = st.form_submit_button("Submit")
-
-            if submitted:     
-
-                if plotType == 'Stacked bar':
-                    
-                    st.write(plot(temp, plotType, features[0], features[1]))
-
-                elif plotType == 'Bar graph':
-                
-                    st.write(plot(temp, plotType, features[0]))
+        elif plotType == 'Bar graph':
+        
+            st.write(plot_bar(temp, plotType, features[0]))
 
         
 
