@@ -14,6 +14,7 @@ st.set_page_config(
 st.title('Exploration of Data')   
 
 PersonalInfo = pd.read_csv('./MainData.csv')
+CommonData = pd.read_csv('./CommonData.csv')
 
 @st.cache
 def convert_df(df):
@@ -91,26 +92,26 @@ with head:
             
 
             
-temp = PersonalInfo
+personal = PersonalInfo
 
 with body:
     if applied:
         
         if len(occupation) != 0:
-            temp = temp.loc[temp.occupation.isin(occupation)] 
+            personal = personal.loc[personal.occupation.isin(occupation)] 
         if len(education) != 0:
-            temp = temp.loc[temp.educationQualification.isin(education)]
+            personal = personal.loc[personal.educationQualification.isin(education)]
         if gender in ['Male', 'Female']:
-            temp = temp[temp.gender == gender]
+            personal = personal[personal.gender == gender]
         if maritalStatus in ['Married', 'Unmarried']:
-            temp = temp[temp.maritalStatus == maritalStatus.upper()]
+            personal = personal[personal.maritalStatus == maritalStatus.upper()]
         if dailyWage:
-            temp = temp[temp.isADailyWageWorker == 'YES']
+            personal = personal[personal.isADailyWageWorker == 'YES']
         
         with st.spinner('Fetching Data...'):
             time.sleep(2)
 
-        outFile = convert_df(temp)
+        outFile = convert_df(personal)
         st.download_button(
             label = 'Download Data as CSV',
             data = outFile,
@@ -118,7 +119,7 @@ with body:
             mime = 'text/csv'
         )
         with st.expander('View Dataframe'):
-            st.write(temp)
+            st.write(personal)
 
 with placeholder:        
 
@@ -126,15 +127,15 @@ with placeholder:
 
         if plotType == 'Stacked bar':
             
-            st.write(plot_stack(temp, features[0], features[1]))
+            st.write(plot_stack(personal, features[0], features[1]))
 
         elif plotType == 'Bar graph':
         
-            st.write(plot_bar(temp, features[0]))
+            st.write(plot_bar(personal, features[0]))
 
         elif plotType == 'Pie chart':
         
-            st.write(plot_pie(temp, features[0]))
+            st.write(plot_pie(personal, features[0]))
 
         
 
