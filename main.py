@@ -19,9 +19,11 @@ PersonalInfo = pd.read_csv('./MainData.csv')
 def convert_df(df):
     return df.to_csv().encode('utf-8')
 
-def plot_stack(data, type, featureA, featureB):
+def plot_stack(data, featureA, featureB):
     try:
-        title = f'Relating {featureA} and {featureB}'
+        data = data[(data[featureA] != 'NO') & (data[featureB] != 'NO')]
+        lenData = len(data)
+        title = f'Relating {featureA} and {featureB}, N = {lenData}'
         fig = px.bar(pd.crosstab(data[featureA], data[featureB]), color=featureB, title = title, width = 1000, orientation = 'h')
     
     except:
@@ -29,10 +31,24 @@ def plot_stack(data, type, featureA, featureB):
     
     return fig
 
-def plot_bar(data, type, feature):
+def plot_bar(data, feature):
     try:
-        title = f'Distribution of {feature}'
+        data = data[data[feature] != 'NO']
+        lenData = len(data)
+        title = f'Distribution of {feature}, N = {lenData}'
         fig = px.histogram(data[feature], title = title, width = 1000)
+    
+    except:
+        fig = Image.open('./error.png')
+    
+    return fig
+
+def plot_pie(data, feature):
+    try:
+        data = data[data[feature] != 'NO']
+        lenData = len(data)
+        title = f'Distribution of {feature}, N = {lenData}'
+        fig = px.pie(names = data[feature], title = title, width = 1000)
     
     except:
         fig = Image.open('./error.png')
@@ -67,7 +83,7 @@ with head:
     
     with st.sidebar.form("choice"):
 
-        plotType = st.selectbox('Choose type of plot', ('Stacked bar', 'Bar graph'))
+        plotType = st.selectbox('Choose type of plot', ('Stacked bar', 'Bar graph', 'Pie chart'))
 
         features = st.multiselect('Choose features to plot', PersonalInfo.columns, ['Age', 'gender'])
 
@@ -110,11 +126,17 @@ with placeholder:
 
         if plotType == 'Stacked bar':
             
-            st.write(plot_stack(temp, plotType, features[0], features[1]))
+            st.write(plot_stack(temp, features[0], features[1]))
 
         elif plotType == 'Bar graph':
         
-            st.write(plot_bar(temp, plotType, features[0]))
+            st.write(plot_bar(temp, features[0]))
+
+        elif plotType == 'Pie chart':
+        
+            st.write(plot_pie(temp, features[0]))
+
+        
 
         
 
