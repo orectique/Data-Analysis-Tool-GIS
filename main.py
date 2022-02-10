@@ -22,7 +22,11 @@ def convert_df(df):
 
 def plot_stack(data, featureA, featureB):
     try:
-        data = data[(data[featureA] != 'NO') & (data[featureB] != 'NO')]
+        if len(data[featureA].unique()) > 2:
+            data = data[data[featureA] != 'NO']
+        if len(data[featureB].unique()) > 2:
+            data = data[data[featureB] != 'NO']
+            
         lenData = len(data)
         title = f'Relating {featureA} and {featureB}, N = {lenData}'
         fig = px.bar(pd.crosstab(data[featureA], data[featureB]), color=featureB, title = title, width = 1000, orientation = 'h')
@@ -34,7 +38,8 @@ def plot_stack(data, featureA, featureB):
 
 def plot_bar(data, feature):
     try:
-        data = data[data[feature] != 'NO']
+        if len(data[feature].unique()) > 2:
+            data = data[data[feature] != 'NO']
         lenData = len(data)
         title = f'Distribution of {feature}, N = {lenData}'
         fig = px.histogram(data[feature], title = title, width = 1000)
@@ -46,7 +51,8 @@ def plot_bar(data, feature):
 
 def plot_pie(data, feature):
     try:
-        data = data[data[feature] != 'NO']
+        if len(data[feature].unique()) > 2:
+            data = data[data[feature] != 'NO']
         lenData = len(data)
         title = f'Distribution of {feature}, N = {lenData}'
         fig = px.pie(names = data[feature], title = title, width = 1000)
