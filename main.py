@@ -4,6 +4,7 @@ import plotly.express as px
 import pandas as pd
 from PIL import Image
 import time
+import numpy as np
 
 st.set_page_config(
     page_title= 'Analysis of Survey Data',
@@ -36,13 +37,49 @@ def plot_stack(data, featureA, featureB):
     
     return fig
 
+def splitList(data):
+
+    temp = data.str.strip().str.lower()
+
+    ls = []
+
+    for i in temp:
+        try:
+            [ls.append(k) for k in i.split(',')]
+        except:
+            pass
+
+    ls = [x.strip(' ') for x in ls]
+
+    print(ls)
+
+    return pd.Series(ls)
+    
+    df = pd.DataFrame(columns=['Data', 'Count'])
+
+    i = 0
+    for val in set(ls):
+        df.loc[i] = [val, data.str.count(val).sum()]
+        i += 1
+    
+    return df    
+
+
 def plot_bar(data, feature):
     try:
         if len(data[feature].unique()) > 2:
             data = data[data[feature] != 'NO']
+
         lenData = len(data)
         title = f'Distribution of {feature}, N = {lenData}'
-        fig = px.histogram(data[feature], title = title, width = 1000)
+
+        if feature in ['locallyAvailableFoodsConsumed']:
+            splitVal = splitList(data[feature])
+            print(splitVal)
+            fig = px.histogram(splitVal, title = title, width = 1000)
+            #fig = px.bar(splitVal, x = 'Data', y = 'Count', title = f'Distribution of {feature}', width = 1000)
+        else:         
+            fig = px.histogram(data[feature], title = title, width = 1000)
     
     except:
         fig = Image.open('./error.png')
@@ -53,10 +90,17 @@ def plot_pie(data, feature):
     try:
         if len(data[feature].unique()) > 2:
             data = data[data[feature] != 'NO']
-        lenData = len(data)
-        title = f'Distribution of {feature}, N = {lenData}'
-        fig = px.pie(names = data[feature], title = title, width = 1000)
-    
+
+        if feature in ['locallyAvailableFoodsConsumed']:
+            splitVal = splitList(data[feature])
+            print(splitVal)
+            fig = px.pie(splitVal, x = 'Data', y = 'Count', title = f'Distribution of {feature}', width = 1000)
+
+        else:
+            lenData = len(data)
+            title = f'Distribution of {feature}, N = {lenData}'
+            fig = px.pie(names = data[feature], title = title, width = 1000)
+        
     except:
         fig = Image.open('./error.png')
     
@@ -90,9 +134,15 @@ with head:
     
     with st.sidebar.form("choice"):
 
+        dfname = st.selectbox('Select Dataset', ('Personal Info', 'Common Data'))
+
         plotType = st.selectbox('Choose type of plot', ('Stacked bar', 'Bar graph', 'Pie chart'))
 
-        features = st.multiselect('Choose features to plot', PersonalInfo.columns, ['Age', 'gender'])
+        if dfname == 'Personal Info':
+            features = st.multiselect('Choose features to plot', PersonalInfo.columns, ['Age Group', 'gender'])
+        
+        elif dfname == 'Common Data':
+            features = st.multiselect('Choose features to plot', CommonData.columns)
 
         submitted = st.form_submit_button("Submit")
             
@@ -127,21 +177,29 @@ with body:
         with st.expander('View Dataframe'):
             st.write(personal)
 
+
+common = CommonData.loc[CommonData._id.isin(personal._id.unique())]
+
 with placeholder:        
 
     if submitted:     
 
+        if dfname == 'Personal Info':
+            data = personal
+        elif dfname == 'Common Data':
+            data = common
+
         if plotType == 'Stacked bar':
             
-            st.write(plot_stack(personal, features[0], features[1]))
+            st.write(plot_stack(data, features[0], features[1]))
 
         elif plotType == 'Bar graph':
         
-            st.write(plot_bar(personal, features[0]))
+            st.write(plot_bar(data, features[0]))
 
         elif plotType == 'Pie chart':
         
-            st.write(plot_pie(personal, features[0]))
+            st.write(plot_pie(data, features[0]))
 
         
 
