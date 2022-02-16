@@ -60,11 +60,10 @@ def plot_bar(data, feature):
         lenData = len(data)
         title = f'Distribution of {feature}, N = {lenData}'
 
-        if feature in ['locallyAvailableFoodsConsumed', 'brandsOfTwoWheelers', 'anganwadiServicesUtilised']:
+        if feature in ['locallyAvailableFoodsConsumed', 'brandsOfTwoWheelers', 'anganwadiServicesUtilised', 'brandsof', 'specialSkills', 'brandsOfThreeWheelers', 'brandsOfFourWheelers', 'cropsCultivated', 'treesOwnedIfAny', 'cropsInKitchenGarden']:
             splitVal = splitList(data[feature])
             fig = px.histogram(splitVal, title = title, width = 1000)
-            #head.write(px.histogram(splitVal, title = title, width = 1000))  
-
+    
             return placeholder.plotly_chart(fig) 
               
         else:         
@@ -87,7 +86,7 @@ def plot_pie(data, feature):
         lenData = len(data)
         title = f'Distribution of {feature}, N = {lenData}'
 
-        if feature in ['locallyAvailableFoodsConsumed', 'anganwadiServicesUtilised']:
+        if feature in ['locallyAvailableFoodsConsumed', 'brandsOfTwoWheelers', 'anganwadiServicesUtilised', 'brandsof', 'specialSkills', 'brandsOfThreeWheelers', 'brandsOfFourWheelers', 'cropsCultivated', 'treesOwnedIfAny', 'cropsInKitchenGarden']:
             splitVal = splitList(data[feature])
             fig = px.pie(names = splitVal, title = title, width = 1000)
             
