@@ -21,12 +21,10 @@ CommonData = pd.read_csv('./CommonData.csv')
 def convert_df(df):
     return df.to_csv().encode('utf-8')
 
-def plot_stack(data, featureA, featureB):
+def plot_stack(data, featureA, featureB, noVals):
     try:
-        if len(data[featureA].unique()) > 2:
-            data = data[data[featureA] != 'NO']
-        if len(data[featureB].unique()) > 2:
-            data = data[data[featureB] != 'NO']
+        if not noVals:
+            data = data[(data[featureA]) != 'NO' & (data[featureB] != 'NO')]
             
         lenData = len(data)
         title = f'Relating {featureA} and {featureB}, N = {lenData}'
@@ -52,9 +50,9 @@ def splitList(data):
     return pd.Series(ls).sort_values()  
 
 
-def plot_bar(data, feature):
+def plot_bar(data, feature, noVals):
     try:
-        if len(data[feature].unique()) > 2:
+        if not noVals:
             data = data[data[feature] != 'NO']
 
         lenData = len(data)
@@ -78,9 +76,9 @@ def plot_bar(data, feature):
     
     
 
-def plot_pie(data, feature):
+def plot_pie(data, feature, noVals):
     try:
-        if len(data[feature].unique()) > 2:
+        if not noVals:
             data = data[data[feature] != 'NO']
 
         lenData = len(data)
@@ -129,8 +127,6 @@ dfname = st.sidebar.selectbox('Select Dataset', ('Personal Info', 'Common Data')
 
 with st.sidebar.form("choice"):
 
-    
-
     plotType = st.selectbox('Choose type of plot', ('Stacked bar', 'Bar graph', 'Pie chart'))
 
     if dfname == 'Personal Info':
@@ -138,6 +134,8 @@ with st.sidebar.form("choice"):
     
     elif dfname == 'Common Data':
         features = st.multiselect('Choose features to plot', CommonData.columns)
+
+    noVals = st.checkbox('Retain No values')
 
     submitted = st.form_submit_button("Submit")
             
@@ -186,15 +184,15 @@ if submitted:
 
     if plotType == 'Stacked bar':
         
-        plot_stack(data, features[0], features[1])
+        plot_stack(data, features[0], features[1], noVals)
 
     elif plotType == 'Bar graph':
     
-        plot_bar(data, features[0])
+        plot_bar(data, features[0], noVals)
 
     elif plotType == 'Pie chart':
     
-        plot_pie(data, features[0])
+        plot_pie(data, features[0], noVals)
 
         
 
