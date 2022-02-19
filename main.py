@@ -4,6 +4,7 @@ import plotly.express as px
 import pandas as pd
 from PIL import Image
 import time
+import numpy as np
 
 st.set_page_config(
     page_title= 'Analysis of Survey Data',
@@ -34,67 +35,111 @@ def plot_stack(data, featureA, featureB):
     except:
         fig = Image.open('./error.png')
     
-    return fig
+    return placeholder.write(fig)
+
+def splitList(data):
+
+    temp = data.str.strip().str.lower()
+
+    ls = []
+
+    for i in temp:
+        try:
+            [ls.append(k.strip(' ')) for k in i.split(',')]
+        except:
+            pass
+
+    return pd.Series(ls).sort_values()  
+
 
 def plot_bar(data, feature):
     try:
         if len(data[feature].unique()) > 2:
             data = data[data[feature] != 'NO']
+
         lenData = len(data)
         title = f'Distribution of {feature}, N = {lenData}'
-        fig = px.histogram(data[feature], title = title, width = 1000)
+
+        if feature in ['locallyAvailableFoodsConsumed', 'brandsOfTwoWheelers', 'anganwadiServicesUtilised', 'brandsof', 'specialSkills', 'brandsOfThreeWheelers', 'brandsOfFourWheelers', 'cropsCultivated', 'treesOwnedIfAny', 'cropsInKitchenGarden']:
+            splitVal = splitList(data[feature])
+            fig = px.histogram(splitVal, title = title, width = 1000)
+    
+            return placeholder.plotly_chart(fig) 
+              
+        else:         
+            fig = px.histogram(data[feature].sort_values(), title = title, width = 1000)
+
+            return placeholder.plotly_chart(fig)
     
     except:
         fig = Image.open('./error.png')
+
+        return placeholder.image(fig)
     
-    return fig
+    
 
 def plot_pie(data, feature):
     try:
         if len(data[feature].unique()) > 2:
             data = data[data[feature] != 'NO']
+
         lenData = len(data)
         title = f'Distribution of {feature}, N = {lenData}'
-        fig = px.pie(names = data[feature], title = title, width = 1000)
-    
+
+        if feature in ['locallyAvailableFoodsConsumed', 'brandsOfTwoWheelers', 'anganwadiServicesUtilised', 'brandsof', 'specialSkills', 'brandsOfThreeWheelers', 'brandsOfFourWheelers', 'cropsCultivated', 'treesOwnedIfAny', 'cropsInKitchenGarden']:
+            splitVal = splitList(data[feature])
+            fig = px.pie(names = splitVal, title = title, width = 1000)
+            
+        else:
+            
+            fig = px.pie(names = data[feature].sort_values(), title = title, width = 1000)
+            
+        
     except:
         fig = Image.open('./error.png')
     
-    return fig
+    return placeholder.write(fig)
 
 head = st.container()
 body = st.container()
 placeholder = st.container()
-
-with head:
     
-    st.sidebar.header('Filters')
-    with st.sidebar.form('filterForm'):
-        gender = st.selectbox('Select Gender', ('Both', 'Male', 'Female'))
+st.sidebar.header('Filters')
 
-        maritalStatus = st.selectbox('Marital Status', ('Both', 'Married', 'Unmarried'))
+with st.sidebar.form('filterForm'):
+    gender = st.selectbox('Select Gender', ('Both', 'Male', 'Female'))
 
-        education = st.multiselect('Highest Educational Qualification', ['Secondary', 'Primary', 'Diploma', 'Under graduate', 'Higher secondary',
+    maritalStatus = st.selectbox('Marital Status', ('Both', 'Married', 'Unmarried'))
+
+    education = st.multiselect('Highest Educational Qualification', ['Secondary', 'Primary', 'Diploma', 'Under graduate', 'Higher secondary',
 'Middle school', 'Uneducated', 'Post graduate'])
 
-        occupation = st.multiselect('Occupation', ['Elementary occupations', 'Plant and machine operators and assemblers',
+    occupation = st.multiselect('Occupation', ['Elementary occupations', 'Plant and machine operators and assemblers',
 'Unemployed', 'Managers', 'Clerical support workers',
 'Craft and related trades workers', 'Service and sales workers', 
 'Skilled agricultural, forestry and fishery workers',
 'Technician and associate professionals', 'Professional',
 'Armed Forces occupations'])
 
-        dailyWage = st.checkbox('Daily Wage')    
+    dailyWage = st.checkbox('Daily Wage')    
 
-        applied = st.form_submit_button("Apply")
+    applied = st.form_submit_button("Apply")
+
+dfname = st.sidebar.selectbox('Select Dataset', ('Personal Info', 'Common Data'))
+
+with st.sidebar.form("choice"):
+
     
-    with st.sidebar.form("choice"):
 
-        plotType = st.selectbox('Choose type of plot', ('Stacked bar', 'Bar graph', 'Pie chart'))
+    plotType = st.selectbox('Choose type of plot', ('Stacked bar', 'Bar graph', 'Pie chart'))
 
-        features = st.multiselect('Choose features to plot', PersonalInfo.columns, ['Age', 'gender'])
+    if dfname == 'Personal Info':
+        features = st.multiselect('Choose features to plot', PersonalInfo.columns, ['Age Group', 'gender'])
+    
+    elif dfname == 'Common Data':
+        features = st.multiselect('Choose features to plot', CommonData.columns)
 
-        submitted = st.form_submit_button("Submit")
+    submitted = st.form_submit_button("Submit")
             
 
             
@@ -127,21 +172,29 @@ with body:
         with st.expander('View Dataframe'):
             st.write(personal)
 
-with placeholder:        
 
-    if submitted:     
+common = CommonData.loc[CommonData._id.isin(personal._id.unique())]
 
-        if plotType == 'Stacked bar':
-            
-            st.write(plot_stack(personal, features[0], features[1]))
+      
 
-        elif plotType == 'Bar graph':
+if submitted:     
+
+    if dfname == 'Personal Info':
+        data = personal
+    elif dfname == 'Common Data':
+        data = common
+
+    if plotType == 'Stacked bar':
         
-            st.write(plot_bar(personal, features[0]))
+        plot_stack(data, features[0], features[1])
 
-        elif plotType == 'Pie chart':
-        
-            st.write(plot_pie(personal, features[0]))
+    elif plotType == 'Bar graph':
+    
+        plot_bar(data, features[0])
+
+    elif plotType == 'Pie chart':
+    
+        plot_pie(data, features[0])
 
         
 
