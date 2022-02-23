@@ -14,8 +14,8 @@ st.set_page_config(
 
 st.title('Exploration of Data')   
 
-PersonalInfo = pd.read_csv('./MainData.csv')
-CommonData = pd.read_csv('./CommonData.csv')
+PersonalInfo = pd.read_csv('./MainDataNew.csv')
+CommonData = pd.read_csv('./CommonDataNew.csv')
 
 @st.cache
 def convert_df(df):
