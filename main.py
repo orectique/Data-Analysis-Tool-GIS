@@ -123,6 +123,8 @@ with st.sidebar.form('filterForm'):
 
     dailyWage = st.checkbox('Daily Wage')    
 
+    village = st.selectbox('Select Village', ('All', 'ntp', 'thc', 'kmp', 'cgpr'))
+
     applied = st.form_submit_button("Apply")
 
 dfname = st.sidebar.selectbox('Select Dataset', ('Personal Info', 'Common Data'))
